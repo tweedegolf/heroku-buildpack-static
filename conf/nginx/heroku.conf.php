@@ -44,9 +44,9 @@ http {
             deny all;
         }
 
-        <?php if (file_exists(getenv('HEROKU_APP_DIR') . '/.heroku/nginx/.htpasswd')): ?>
+        <?php if (file_exists(getenv('HEROKU_APP_DIR') . '/.heroku/php/.htpasswd')): ?>
             auth_basic "Restricted";
-            auth_basic_user_file <?=getenv('HEROKU_APP_DIR')?>/.heroku/nginx/.htpasswd;
+            auth_basic_user_file <?=getenv('HEROKU_APP_DIR')?>/.heroku/php/.htpasswd;
         <?php endif; ?>
 
         # default handling of .php
