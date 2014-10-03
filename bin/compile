@@ -367,7 +367,8 @@ fi
 # Load passwords from password file
 PASSWORD=
 if [[ -f $BUILD_DIR/.password ]]; then
-    PASSWORD=(${`cat $BUILD_DIR/.password`//:/ })
+    PASSWORD=`cat $BUILD_DIR/.password`
+    PASSWORD=(${PASSWORD//:/ })
     htpasswd -bn $BUILD_DIR/.heroku/nginx/.htpasswd ${PASSWORD[0]} ${PASSWORD[1]}
 fi
 
