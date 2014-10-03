@@ -24,41 +24,46 @@ http {
         server unix:/tmp/heroku.fcgi.<?=getenv('PORT')?:'8080'?>.sock max_fails=3 fail_timeout=3s;
         keepalive 16;
     }
-    
+
     server {
         # TODO: use X-Forwarded-Host? http://comments.gmane.org/gmane.comp.web.nginx.english/2170
         server_name localhost;
         listen <?=getenv('PORT')?:'8080'?>;
         # FIXME: breaks redirects with foreman
         port_in_redirect off;
-        
+
         root "<?=getenv('DOCUMENT_ROOT')?:getenv('HEROKU_APP_DIR')?:getcwd()?>";
-        
+
         error_log stderr;
         access_log /tmp/heroku.nginx_access.<?=getenv('PORT')?:'8080'?>.log;
-        
+
         include "<?=getenv('HEROKU_PHP_NGINX_CONFIG_INCLUDE')?>";
-        
+
         # restrict access to hidden files, just in case
         location ~ /\. {
             deny all;
         }
-        
+
+        <?php if (file_exists(getenv('HEROKU_APP_DIR') . '/.heroku/nginx/.htpasswd')): ?>
+            auth_basic "Restricted";
+            auth_basic_user_file <?=getenv('HEROKU_APP_DIR')?>/.heroku/nginx/.htpasswd;
+        <?php endif; ?>
+
         # default handling of .php
         location ~ \.php {
             include fastcgi_params;
-            
+
             fastcgi_split_path_info ^(.+\.php)(/.*)$;
             fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
             # try_files resets $fastcgi_path_info, see http://trac.nginx.org/nginx/ticket/321, so we use the if instead
             fastcgi_param PATH_INFO $fastcgi_path_info if_not_empty;
-            
+
             if (!-f $document_root$fastcgi_script_name) {
                 # check if the script exists
                 # otherwise, /foo.jpg/bar.php would get passed to FPM, which wouldn't run it as it's not in the list of allowed extensions, but this check is a good idea anyway, just in case
                 return 404;
             }
-            
+
             fastcgi_pass heroku-fcgi;
         }
     }

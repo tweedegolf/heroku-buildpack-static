@@ -1,5 +1,5 @@
 location / {
-    index  index.php index.html index.htm;
+    index  index.php index.html;
 }
 
 # for people with app root as doc root, restrict access to a few things
